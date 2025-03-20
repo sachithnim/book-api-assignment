@@ -19,13 +19,16 @@ func LoadBooks() ([]models.Book, error) {
 
 	file, err := os.ReadFile(dataFile)
 	if err != nil {
-		return []models.Book{}, nil
+		if errors.Is(err, os.ErrNotExist) {
+			return []models.Book{}, nil // If file does not exist, return empty
+		}
+		return nil, err // Return actual error
 	}
 
 	var books []models.Book
 	err = json.Unmarshal(file, &books)
 	if err != nil {
-		return nil, err
+		return nil, err // Return error if JSON parsing fails
 	}
 	return books, nil
 }
