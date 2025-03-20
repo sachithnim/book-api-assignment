@@ -59,9 +59,41 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	books, _ := repository.LoadBooks()
 	for i, book := range books {
 		if book.BookID == params["id"] {
-			books[i] = updatedBook
+			// Only update non empty fields
+			if updatedBook.Title != "" {
+				book.Title = updatedBook.Title
+			}
+			if updatedBook.AuthorID != "" {
+				book.AuthorID = updatedBook.AuthorID
+			}
+			if updatedBook.PublisherID != "" {
+				book.PublisherID = updatedBook.PublisherID
+			}
+			if updatedBook.PublicationDate != "" {
+				book.PublicationDate = updatedBook.PublicationDate
+			}
+			if updatedBook.ISBN != "" {
+				book.ISBN = updatedBook.ISBN
+			}
+			if updatedBook.Pages != 0 {
+				book.Pages = updatedBook.Pages
+			}
+			if updatedBook.Genre != "" {
+				book.Genre = updatedBook.Genre
+			}
+			if updatedBook.Description != "" {
+				book.Description = updatedBook.Description
+			}
+			if updatedBook.Price != 0 {
+				book.Price = updatedBook.Price
+			}
+			if updatedBook.Quantity != 0 {
+				book.Quantity = updatedBook.Quantity
+			}
+
+			books[i] = book
 			repository.SaveBooks(books)
-			json.NewEncoder(w).Encode(updatedBook)
+			json.NewEncoder(w).Encode(book)
 			return
 		}
 	}
