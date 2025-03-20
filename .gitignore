@@ -1,0 +1,45 @@
+# Ignore compiled executables and binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.out
+
+# Ignore Go build cache and dependencies
+/bin/
+/pkg/
+/vendor/
+
+# Ignore Go test output
+*.test
+*.prof
+
+# Ignore dependency manager files (Go Modules)
+go.sum
+go.mod
+
+# Ignore environment files and secrets
+.env
+.env.local
+.env.production
+.env.development
+
+# Ignore logs and debug files
+*.log
+logs/
+debug.log
+
+# Ignore temporary editor/project files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Ignore data files
+data/*.json
+
+# Ignore Node.js dependencies
+node_modules/
