@@ -12,6 +12,7 @@ const dataFile = "data/books.json"
 
 var mu sync.Mutex
 
+// reads books from the JSON file.
 func LoadBooks() ([]models.Book, error) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -29,6 +30,7 @@ func LoadBooks() ([]models.Book, error) {
 	return books, nil
 }
 
+// writes books to the JSON file.
 func SaveBooks(books []models.Book) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -40,6 +42,7 @@ func SaveBooks(books []models.Book) error {
 	return os.WriteFile(dataFile, data, 0644)
 }
 
+// Find a book by ID
 func FindBookByID(id string) (*models.Book, error) {
 	books, _ := LoadBooks()
 	for _, book := range books {
