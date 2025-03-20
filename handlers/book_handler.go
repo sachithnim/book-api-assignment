@@ -9,28 +9,59 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Standard response structure
+type Response struct {
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+// Utility function to send JSON response
+func sendResponse(w http.ResponseWriter, statusCode int, status string, message string, data interface{}) {
+	w.Header().Set("Content-Type", "application/json") // Ensure correct response type
+	w.WriteHeader(statusCode)
+
+	response := Response{
+		Status:  status,
+		Message: message,
+		Data:    data,
+	}
+
+	// Send JSON response
+	jsonResponse, _ := json.Marshal(response)
+	w.Write(jsonResponse)
+}
+
 func GetBooks(w http.ResponseWriter, r *http.Request) {
-	books, _ := repository.LoadBooks()
-	json.NewEncoder(w).Encode(books)
+	books, err := repository.LoadBooks()
+	if err != nil {
+		sendResponse(w, http.StatusInternalServerError, "error", "Failed to load books", nil)
+		return
+	}
+	sendResponse(w, http.StatusOK, "success", "Books retrieved successfully", books)
 }
 
 func GetBookByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	book, err := repository.FindBookByID(params["id"])
 	if err != nil {
-		http.Error(w, "Book not found", http.StatusNotFound)
+		sendResponse(w, http.StatusNotFound, "error", "Book not found", nil)
 		return
 	}
-	json.NewEncoder(w).Encode(book)
+	sendResponse(w, http.StatusOK, "success", "Book retrieved successfully", book)
 }
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
-	json.NewDecoder(r.Body).Decode(&book)
+	err := json.NewDecoder(r.Body).Decode(&book)
+	if err != nil {
+		sendResponse(w, http.StatusBadRequest, "error", "Invalid request body", nil)
+		return
+	}
 
 	// Ensure BookID is provided
 	if book.BookID == "" {
-		http.Error(w, "BookID is required", http.StatusBadRequest)
+		sendResponse(w, http.StatusBadRequest, "error", "BookID is required", nil)
 		return
 	}
 
@@ -39,7 +70,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	// Check for duplicate BookID
 	for _, existingBook := range books {
 		if existingBook.BookID == book.BookID {
-			http.Error(w, "BookID already exists", http.StatusConflict)
+			sendResponse(w, http.StatusConflict, "error", "BookID already exists", nil)
 			return
 		}
 	}
@@ -47,14 +78,17 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	books = append(books, book)
 	repository.SaveBooks(books)
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(book)
+	sendResponse(w, http.StatusCreated, "success", "Book created successfully", book)
 }
 
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var updatedBook models.Book
-	json.NewDecoder(r.Body).Decode(&updatedBook)
+	err := json.NewDecoder(r.Body).Decode(&updatedBook)
+	if err != nil {
+		sendResponse(w, http.StatusBadRequest, "error", "Invalid request body", nil)
+		return
+	}
 
 	books, _ := repository.LoadBooks()
 	for i, book := range books {
@@ -93,24 +127,40 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 			books[i] = book
 			repository.SaveBooks(books)
-			json.NewEncoder(w).Encode(book)
+
+			sendResponse(w, http.StatusOK, "success", "Book updated successfully", book)
 			return
 		}
 	}
-	http.Error(w, "Book not found", http.StatusNotFound)
+
+	sendResponse(w, http.StatusNotFound, "error", "Book not found", nil)
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	books, _ := repository.LoadBooks()
+	index := -1
 	for i, book := range books {
 		if book.BookID == params["id"] {
-			books = append(books[:i], books[i+1:]...)
-			repository.SaveBooks(books)
-			w.WriteHeader(http.StatusNoContent)
-			return
+			index = i
+			break
 		}
 	}
-	http.Error(w, "Book not found", http.StatusNotFound)
+
+	if index == -1 {
+		sendResponse(w, http.StatusNotFound, "error", "Book not found", nil)
+		return
+	}
+
+	// Remove book
+	books = append(books[:index], books[index+1:]...)
+
+	// Save changes
+	if err := repository.SaveBooks(books); err != nil {
+		sendResponse(w, http.StatusInternalServerError, "error", "Failed to delete book", nil)
+		return
+	}
+
+	sendResponse(w, http.StatusOK, "success", "Book deleted successfully", nil)
 }
