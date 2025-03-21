@@ -4,7 +4,9 @@ import (
 	"book-api-assignment/models"
 	"book-api-assignment/repository"
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -38,7 +40,49 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, http.StatusInternalServerError, "error", "Failed to load books", nil)
 		return
 	}
-	sendResponse(w, http.StatusOK, "success", "Books retrieved successfully", books)
+
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))   // Get page number (pagination)
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit")) // Get limit per page
+
+	if page < 1 {
+		page = 1 // Default to page 1
+	}
+	if limit < 1 {
+		limit = 5 // Default limit per page
+	}
+
+	start := (page - 1) * limit
+	end := start + limit
+	totalBooks := len(books)
+
+	if start >= totalBooks {
+		sendResponse(w, http.StatusOK, "success", "No books found for this page", []models.Book{})
+		return
+	}
+
+	if end > totalBooks {
+		end = totalBooks
+	}
+
+	// Paginated books
+	paginatedBooks := books[start:end]
+
+	// Calculate total pages
+	totalPages := int(math.Ceil(float64(totalBooks) / float64(limit)))
+
+	// Create pagination response
+	paginationResponse := map[string]interface{}{
+		"status":      "success",
+		"message":     "Books retrieved successfully",
+		"totalBooks":  totalBooks,
+		"totalPages":  totalPages,
+		"currentPage": page,
+		"limit":       limit,
+		"data":        paginatedBooks,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(paginationResponse)
 }
 
 func GetBookByID(w http.ResponseWriter, r *http.Request) {
