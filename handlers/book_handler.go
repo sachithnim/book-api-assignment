@@ -7,6 +7,8 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -207,4 +209,66 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, http.StatusOK, "success", "Book deleted successfully", nil)
+}
+
+// Search for books by title and description (concurrent implementation)
+func SearchBooksHandler(w http.ResponseWriter, r *http.Request) {
+	query := strings.ToLower(r.URL.Query().Get("q")) // Get query parameter and convert to lowercase
+	if query == "" {
+		sendResponse(w, http.StatusBadRequest, "error", "Query parameter 'q' is required", nil)
+		return
+	}
+
+	books, err := repository.LoadBooks()
+	if err != nil {
+		sendResponse(w, http.StatusInternalServerError, "error", "Failed to load books", nil)
+		return
+	}
+
+	// Number of goroutines to use for searching
+	numWorkers := 4
+	chunkSize := (len(books) + numWorkers - 1) / numWorkers
+
+	// Channel to collect results
+	resultsChan := make(chan []models.Book, numWorkers)
+	var wg sync.WaitGroup
+
+	// Launch concurrent search workers
+	for i := 0; i < numWorkers; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(books) {
+			end = len(books)
+		}
+
+		wg.Add(1)
+		go searchBooksWorker(books[start:end], query, resultsChan, &wg)
+	}
+
+	// Wait for all workers to complete
+	wg.Wait()
+	close(resultsChan)
+
+	// Merge results
+	var matchedBooks []models.Book
+	for books := range resultsChan {
+		matchedBooks = append(matchedBooks, books...)
+	}
+
+	sendResponse(w, http.StatusOK, "success", "Search completed", matchedBooks)
+}
+
+// Worker function to search a subset of books
+func searchBooksWorker(books []models.Book, query string, resultsChan chan<- []models.Book, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	var matchedBooks []models.Book
+	for _, book := range books {
+		if strings.Contains(strings.ToLower(book.Title), query) || strings.Contains(strings.ToLower(book.Description), query) {
+			matchedBooks = append(matchedBooks, book)
+		}
+	}
+
+	// Send results to the channel
+	resultsChan <- matchedBooks
 }
