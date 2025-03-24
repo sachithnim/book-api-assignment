@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -105,25 +106,20 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Ensure BookID is provided
-	if book.BookID == "" {
-		sendResponse(w, http.StatusBadRequest, "error", "BookID is required", nil)
-		return
-	}
+	book.BookID = uuid.New().String()
+	book.AuthorID = uuid.New().String()
+	book.PublisherID = uuid.New().String()
 
+	// Load existing books
 	books, _ := repository.LoadBooks()
 
-	// Check for duplicate BookID
-	for _, existingBook := range books {
-		if existingBook.BookID == book.BookID {
-			sendResponse(w, http.StatusConflict, "error", "BookID already exists", nil)
-			return
-		}
-	}
-
+	// Append the new book with generated IDs
 	books = append(books, book)
+
+	// Save the updated list of books
 	repository.SaveBooks(books)
 
+	// Send the response with the new book data
 	sendResponse(w, http.StatusCreated, "success", "Book created successfully", book)
 }
 
