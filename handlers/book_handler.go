@@ -213,7 +213,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 // Search for books by title and description (concurrent implementation)
 func SearchBooksHandler(w http.ResponseWriter, r *http.Request) {
-	query := strings.ToLower(r.URL.Query().Get("q")) // Get query parameter and convert to lowercase
+	query := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q"))) // Get query parameter and convert to lowercase
 	if query == "" {
 		sendResponse(w, http.StatusBadRequest, "error", "Query parameter 'q' is required", nil)
 		return
