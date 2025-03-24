@@ -37,51 +37,53 @@ func sendResponse(w http.ResponseWriter, statusCode int, status string, message 
 	w.Write(jsonResponse)
 }
 
+// Get all books with pagination
 func GetBooks(w http.ResponseWriter, r *http.Request) {
+
 	books, err := repository.LoadBooks()
 	if err != nil {
 		sendResponse(w, http.StatusInternalServerError, "error", "Failed to load books", nil)
 		return
 	}
 
-	page, _ := strconv.Atoi(r.URL.Query().Get("page"))   // Get page number (pagination)
-	limit, _ := strconv.Atoi(r.URL.Query().Get("limit")) // Get limit per page
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))   // return books
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset")) // books to skip
 
-	if page < 1 {
-		page = 1 // Default to page 1
-	}
 	if limit < 1 {
 		limit = 5 // Default limit per page
 	}
+	if offset < 0 {
+		offset = 0 // Default offset is 0
+	}
 
-	start := (page - 1) * limit
-	end := start + limit
 	totalBooks := len(books)
 
-	if start >= totalBooks {
-		sendResponse(w, http.StatusOK, "success", "No books found for this page", []models.Book{})
+	// Ensure the offset is within bounds
+	if offset >= totalBooks {
+		sendResponse(w, http.StatusOK, "success", "No more books to show", []models.Book{})
 		return
 	}
 
+	// Calculate end index based on offset and limit
+	end := offset + limit
 	if end > totalBooks {
 		end = totalBooks
 	}
 
-	// Paginated books
-	paginatedBooks := books[start:end]
+	// Paginate the books
+	paginatedBooks := books[offset:end]
 
-	// Calculate total pages
-	totalPages := int(math.Ceil(float64(totalBooks) / float64(limit)))
+	totalPages := int(math.Ceil(float64(totalBooks) / float64(limit))) // Calculate total pages
 
-	// Create pagination response
+	// pagination response
 	paginationResponse := map[string]interface{}{
-		"status":      "success",
-		"message":     "Books retrieved successfully",
-		"totalBooks":  totalBooks,
-		"totalPages":  totalPages,
-		"currentPage": page,
-		"limit":       limit,
-		"data":        paginatedBooks,
+		"status":     "success",
+		"message":    "Books retrieved successfully",
+		"totalBooks": totalBooks,
+		"totalPages": totalPages,
+		"offset":     offset,
+		"limit":      limit,
+		"data":       paginatedBooks,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -110,14 +112,11 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	book.AuthorID = uuid.New().String()
 	book.PublisherID = uuid.New().String()
 
-	// Load existing books
-	books, _ := repository.LoadBooks()
+	books, _ := repository.LoadBooks() // Load existing books
 
-	// Append the new book with generated IDs
-	books = append(books, book)
+	books = append(books, book) // Append the new book with generated IDs
 
-	// Save the updated list of books
-	repository.SaveBooks(books)
+	repository.SaveBooks(books) // Save the updated list of books
 
 	// Send the response with the new book data
 	sendResponse(w, http.StatusCreated, "success", "Book created successfully", book)
