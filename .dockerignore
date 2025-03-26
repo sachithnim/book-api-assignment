@@ -1,0 +1,7 @@
+# Ignore test files and directories
+/test
+*.test
+*.log
+
+# Ignore build artifacts
+/main
