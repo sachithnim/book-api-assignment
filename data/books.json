@@ -1,0 +1,80 @@
+[
+  {
+    "bookId": "fab04289-df6c-4ae7-ace4-b867edfc18d3",
+    "authorId": "75354d2b-f4d6-4d38-9353-a0f90562df11",
+    "publisherId": "1d524cbc-e405-4f87-b4fc-85c7f2299176",
+    "title": "The Great Gatsby",
+    "publicationDate": "1925-04-10",
+    "isbn": "9780743273565",
+    "pages": 180,
+    "genre": "Novel",
+    "description": "Set in the 1920s, this classic novel explores themes of wealth, love, and the American Dream.",
+    "price": 15.99,
+    "quantity": 5
+  },
+  {
+    "bookId": "bc177d63-f598-4095-bf32-1edef2cf3f04",
+    "authorId": "6a9a59f2-d9d3-4e34-9ad7-3db1869a30cb",
+    "publisherId": "969df03e-d276-4684-ba51-568339eb7cc9",
+    "title": "To Kill a Mockingbird",
+    "publicationDate": "1960-07-11",
+    "isbn": "9780061120084",
+    "pages": 281,
+    "genre": "Fiction",
+    "description": "A novel about the serious issues of rape and racial inequality, told through the perspective of a young girl in the American South.",
+    "price": 18.99,
+    "quantity": 3
+  },
+  {
+    "bookId": "cef0414b-78ae-4e92-9e80-ea18dc40ec9d",
+    "authorId": "48e792d6-4a89-4d59-8a00-aa4a281292e7",
+    "publisherId": "2ecb7b12-3d7f-4fe4-9047-1a0de565648b",
+    "title": "1984",
+    "publicationDate": "1949-06-08",
+    "isbn": "9780451524935",
+    "pages": 328,
+    "genre": "Dystopian, Science Fiction",
+    "description": "A chilling portrayal of a totalitarian society under constant surveillance, controlled by a figure known as Big Brother.",
+    "price": 12.99,
+    "quantity": 10
+  },
+  {
+    "bookId": "9d2c6d13-0499-4162-b3ae-5593f249e2be",
+    "authorId": "5afef5ab-c51c-4205-b00f-21e9aa5f87a6",
+    "publisherId": "ad1d93dc-2411-41e7-95d4-33970c25348d",
+    "title": "Pride and Prejudice",
+    "publicationDate": "1813-01-28",
+    "isbn": "9780141439518",
+    "pages": 432,
+    "genre": "Romance, Classic",
+    "description": "A love story set in 19th century England that explores themes of class, marriage, and morality.",
+    "price": 9.99,
+    "quantity": 7
+  },
+  {
+    "bookId": "3ebb1eaf-2db7-495f-a75e-e32632e517e2",
+    "authorId": "a3762b31-744e-40a0-8bd7-c1bd67b4574e",
+    "publisherId": "fe672b59-eab8-45ef-82fb-72b56c9d24c2",
+    "title": "Moby-Dick updated",
+    "publicationDate": "1851-10-18",
+    "isbn": "9781503280786",
+    "pages": 585,
+    "genre": "Adventure, Classic updated",
+    "description": "The epic tale of Captain Ahab's obsessive quest to hunt the white whale, Moby Dick.",
+    "price": 14.99,
+    "quantity": 4
+  },
+  {
+    "bookId": "442ca98d-7420-4837-96f6-821b5b91bc68",
+    "authorId": "4b458ad4-57d5-4627-8dee-2d0cd8d73bf2",
+    "publisherId": "6b707e2a-7f44-4ac3-8a55-6b28b9f4fdd0",
+    "title": "Python",
+    "publicationDate": "1851-10-18",
+    "isbn": "9781503280786",
+    "pages": 585,
+    "genre": "Education, Programming",
+    "description": "Covering topics from basic syntax to more advanced concepts",
+    "price": 14.99,
+    "quantity": 4
+  }
+]
